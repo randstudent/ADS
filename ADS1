@@ -107,13 +107,14 @@ class Tree {
             cout << "Data not found :(" << endl;
         }
 
-        node* mirror (node* root) {
+        void mirror (node* root) {
             if (root == NULL) {
-                return NULL;
+                return;
             }
-            node* temp = new node (root -> key, root -> value);
-            temp -> left = mirror (root -> left);
-            temp -> right = mirror (root -> right);
+            swap (root -> left, root -> right);
+            mirror (root -> left);
+            mirror (root -> right);
+            return;
         }
 
         void mirrorTree () {
