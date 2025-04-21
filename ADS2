@@ -1,0 +1,231 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct player {
+    int id;
+    int score;
+    player* left;
+    player* right;
+    int height;
+};
+
+class Game {
+    public :
+        int Height (player* temp) {
+            if (temp == NULL) {
+                return 0;
+            }
+            return temp -> height;
+        }
+
+        int getBalance (player* temp) {
+            if (temp == NULL) {
+                return 0;
+            }
+            return Height (temp -> left) - Height (temp -> right);
+        }
+
+        player* leftRotation (player* x) {
+            player* y = x -> right;
+            player* T2 = y -> left;
+
+            y -> left = x;
+            x -> right = T2;
+
+            x -> height = max (Height (x -> left), Height (x -> right)) + 1;
+            y -> height = max (Height (y -> left), Height (y -> right)) + 1;
+
+            return y;
+        }
+
+        player* rightRotation (player* y) {
+            player* x = y -> left;
+            player* T2 = x -> right;
+
+            x -> right = y;
+            y -> left = T2;
+
+            y -> height = max (Height (y -> left), Height (y -> right)) + 1;
+            x -> height = max (Height (x -> left), Height (x -> right)) + 1;
+
+            return x;
+        }
+
+        player* insert (player* temp, int id, int score) {
+            if (temp == NULL) {
+                player* newPlayer = new player;
+                newPlayer -> id = id;
+                newPlayer -> score = score;
+                newPlayer -> left = NULL;
+                newPlayer -> right = NULL;
+                newPlayer -> height = 1;
+                return newPlayer;
+            }
+
+            if (id < temp -> id) {
+                temp -> left = insert (temp -> left, id, score);
+            }
+            else if (id > temp -> id) {
+                temp -> right = insert (temp -> right, id, score);
+            }
+            else {
+                return temp;
+            }
+
+            temp -> height = max (Height (temp -> left), Height (temp -> right)) + 1;
+
+            int balance = getBalance (temp);
+
+            if (balance > 1 && id < temp -> left -> id) {
+                return rightRotation (temp); }
+
+            if (balance < -1 && id > temp -> right -> id) {
+                return leftRotation (temp); }
+
+            if (balance > 1 && id > temp -> left -> id) {
+                temp -> left = leftRotation (temp);
+                return rightRotation (temp); }
+
+            if (balance < -1 && id < temp -> right -> id) {
+                temp -> right = rightRotation (temp);
+                return leftRotation (temp); }
+
+            return temp;
+        }
+
+        void inorder(player* temp) {
+            if (temp == NULL) {
+                return;
+            }
+            inorder(temp -> left);
+            cout << "Player : " << temp->id << " has score : " << temp->score << endl;
+            inorder(temp -> right);
+        }
+
+        player* minValue (player* temp) {
+            player* current = temp;
+            while (current -> left != NULL) {
+                current = current -> left;
+            }
+            return current;
+        }
+
+        player* deleteNode (player* root, int id) {
+            if (root == NULL) {
+                return root;
+            }
+
+            if (id < root -> id) {
+                root -> left = deleteNode (root -> left, id);
+            }
+            else if (id > root -> id) {
+                root -> right = deleteNode (root -> right, id);
+            }
+            else {
+                if (root -> left == NULL || root -> right == NULL) {
+                    player* temp;
+                    if (root -> left != NULL) {
+                        temp = root -> left;
+                    }
+                    else {
+                        temp = root -> right;
+                    }
+
+                    if (temp == NULL) {
+                        temp = root;
+                        root = NULL;
+                    }
+                    else {
+                        *root = *temp;
+                    }
+
+                    delete temp;
+                }
+                else {
+                    player* temp = minValue (root -> right);
+                    root -> id = temp -> id;
+                    root -> score = temp -> score;
+                    root -> right = deleteNode (root -> right, temp -> id);
+                }
+            }
+
+            if (root == NULL) {
+                return root;
+            }
+            root -> height = max (Height (root -> left), Height (root -> right)) + 1;
+
+            int balance = getBalance(root);
+
+            if (balance > 1 && getBalance(root->left) >= 0) {
+                return rightRotation (root);
+            }
+
+            if (balance > 1 && getBalance(root->left) < 0) {
+                root->left = leftRotation (root->left);
+                return rightRotation (root);
+            }
+
+            if (balance < -1 && getBalance(root->right) <= 0) {
+                return leftRotation (root);
+            }
+
+             if (balance < -1 && getBalance(root->right) > 0) {
+                 root->right = rightRotation (root->right);
+                return leftRotation (root);
+            }
+
+            return root;
+        }
+};
+
+int main() {
+    Game g1;
+    player* root = NULL;
+    int choice;
+
+    do {
+         cout << "\nMenu:\n";
+        cout << "1. Insert Player\n";
+        cout << "2. Display Inorder Traversal\n";
+        cout << "3. Delete Player\n";
+        cout << "4. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                int p_id;
+                cout << "Enter Player ID : ";
+                cin >> p_id;
+                int p_score;
+                cout << "Enter Player score : ";
+                cin >> p_score;
+
+                root = g1.insert (root, p_id, p_score);
+                break;
+
+            case 2:
+                cout << "\nInorder Traversal : \n";
+                g1.inorder (root);
+                break;
+
+            case 3:
+                int del_id;
+                cout << "\nEnter the Player Id to be removed : \n";
+                cin >> del_id;
+
+                root = g1.deleteNode (root, del_id);
+                break;
+
+            case 4:
+                cout << "\nExiting\n";
+                break;
+
+            default:
+                cout << "\nInvalid choice, try again.\n";
+                break;
+        }
+    } while (choice != 4);
+    return 0;
+}
