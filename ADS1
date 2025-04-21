@@ -1,0 +1,293 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class node {
+    public:
+        string key;
+        string value;
+        node* left;
+        node* right;
+
+        node (string k, string v) {
+            key = k;
+            value = v;
+            left = right = NULL;
+        }
+};
+
+class Tree {
+    public:
+        node* root;
+
+        Tree() {
+            root = NULL;
+        }
+
+        void insertion (string k, string v) {
+            node* newNode = new node(k, v);
+
+            if (root == NULL) {
+                root = newNode;
+                return;
+            }
+
+            node* temp = root;
+            while (temp != NULL) {
+
+                if (k == temp -> key) {
+                    return;
+                }
+
+                if (k < temp -> key) {
+                    if (temp -> left == NULL) {
+                        temp -> left = newNode;
+                        return;
+                    }
+                    else {
+                        temp = temp -> left;
+                    }
+                }
+
+                else {
+                    if (temp -> right == NULL) {
+                        temp -> right = newNode;
+                        return;
+                    }
+                    else {
+                        temp = temp -> right;
+                    }
+                }
+            }
+
+        }
+
+        void displayInorder (node* temp) {
+            if (temp == NULL) {
+                return;
+            }
+            displayInorder (temp -> left);
+            cout << temp -> key << " : " << temp -> value << endl;
+            displayInorder (temp -> right);
+        }
+
+        void displayPreorder (node* temp) {
+            if (temp == NULL) {
+                return;
+            }
+            cout << temp -> key << " : " << temp -> value << endl;
+            displayPreorder (temp -> left);
+            displayPreorder (temp -> right);
+        }
+
+        void displayPostorder (node* temp) {
+            if (temp == NULL) {
+                return;
+            }
+            displayPostorder (temp -> left);
+            displayPostorder (temp -> right);
+            cout << temp -> key << " : " << temp -> value << endl;
+        }
+
+        void search (string k) {
+            node* temp = root;
+
+            while (temp != NULL) {
+                if (temp -> key == k) {
+                    cout << "Data Found :)" << endl;
+                    return;
+                }
+                else if (k < temp -> key) {
+                    temp = temp -> left;
+                }
+                else {
+                    temp = temp -> right;
+                }
+            }
+            cout << "Data not found :(" << endl;
+        }
+
+        node* mirror (node* root) {
+            if (root == NULL) {
+                return NULL;
+            }
+            node* temp = new node (root -> key, root -> value);
+            temp -> left = mirror (root -> left);
+            temp -> right = mirror (root -> right);
+        }
+
+        void mirrorTree () {
+            mirror (root);
+        }
+
+        node* clone (node* temp) {
+            if (temp == NULL) {
+                return NULL;
+            }
+
+            node* newNode = new node (temp -> key, temp -> value);
+            newNode -> left = clone (temp -> left);
+            newNode -> right = clone (temp -> right);
+            return newNode;
+        }
+
+        Tree* cloneTree () {
+            Tree* newTree = new Tree ();
+            newTree -> root = clone (root);
+            return newTree;
+        }
+
+        node* findMin (node* temp) {
+            while (temp -> left != NULL) {
+                temp = temp -> left;
+            }
+            return temp;
+        }
+
+        node* deleteNode (node* current, string k) {
+            if (current == NULL) {
+                return NULL;
+            }
+            if (k < current -> key) {
+                current -> left = deleteNode (current -> left, k);
+            }
+            else if (k > current -> key) {
+                current -> right = deleteNode (current -> right, k);
+            }
+            else {
+                if (current -> left == NULL) {
+                    node* temp = current -> right;
+                    delete current;
+                    return temp;
+                }
+                if (current -> right == NULL) {
+                    node* temp = current -> left;
+                    delete current;
+                    return temp;
+                }
+                node* temp = findMin (current -> right);
+                current -> key = temp -> key;
+                current -> value = temp -> value;
+                current -> right = deleteNode (current -> right, temp -> key);
+            }
+            return current;
+        }
+
+        void deleteKey (string k) {
+            root = deleteNode (root, k);
+        }
+
+        int getHeight (node* temp) {
+            if (temp == NULL) {
+                return 0;
+            }
+            int leftHeight = getHeight (temp -> left);
+            int rightHeight = getHeight (temp -> right);
+            return max (leftHeight, rightHeight) + 1;
+        }
+
+        void printLevel (node* temp, int level) {
+            if (temp == NULL) {
+                return;
+            }
+            if (level == 1) {
+                cout << temp -> key << " : " << temp -> value << endl;
+            }
+            else {
+                printLevel (temp -> left, level - 1);
+                printLevel (temp -> right, level - 1);
+            }
+        }
+
+        void levelOrder () {
+            int h = getHeight (root);
+            cout << "\nLevel-wise display" << endl;
+            for (int i = 1; i <= h; i++) {
+                printLevel (root, i);
+                cout << endl;
+            }
+        }
+};
+
+int main() {
+    Tree t1;
+    string key;
+    string value;
+    int choice;
+
+    do {
+        cout << "\n---- Dictionary Operations Menu ----\n";
+        cout << "1. Insert a Node\n";
+        cout << "2. Search a Node\n";
+        cout << "3. Delete a Node\n";
+        cout << "4. Inorder Traversal\n";
+        cout << "5. Preorder Traversal\n";
+        cout << "6. Postorder Traversal\n";
+        cout << "7. Level-order Traversal\n";
+        cout << "8. Mirror Tree\n";
+        cout << "9. Clone Tree\n";
+        cout << "10. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+            cout << "Enter the key and value pair to insert: ";
+                cin >> key;
+                cin >> value;
+                t1.insertion(key, value);
+                break;
+
+             case 2:
+                cout << "Enter the key to search: ";
+                cin >> key;
+                t1.search(key);
+                break;
+
+            case 3:
+                cout << "Enter the key to delete: ";
+                cin >> key;
+                t1.deleteKey(key);
+                break;
+
+            case 4:
+                cout << "\nInorder traversal : " << endl;
+                t1.displayInorder(t1.root);
+                break;
+
+            case 5:
+                cout << "\nPreorder traversal : " << endl;
+                t1.displayPreorder(t1.root);
+                break;
+            case 6:
+                cout << "\nPostorder traversal : " << endl;
+                t1.displayPostorder(t1.root);
+                break;
+
+            case 7:
+                t1.levelOrder();
+                break;
+
+            case 8:
+                t1.mirrorTree();   //remove mirrorTree function from above and do mirror (t1.root); here
+                cout << "\nTree has been mirrored!" << endl;
+                break;
+
+            case 9:
+                {
+                    Tree* t2 = t1.cloneTree();
+                    cout << "\nInorder of cloned tree : " << endl;
+                    t2->displayInorder(t2->root);
+                    delete t2;
+                }
+                break;
+
+             case 10:
+                cout << "Exiting the program." << endl;
+                break;
+            default:
+                cout << "Invalid choice, please try again." << endl;
+        }
+    } while (choice != 10 );
+    return 0;
+}
