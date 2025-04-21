@@ -1,0 +1,71 @@
+#include <iostream>
+using namespace std;
+
+const int MAX_NODES = 100;
+const int INF = 999999;
+
+int minDistance(int dist[], bool visited[], int V) {
+    int min = INF, min_index = -1;
+    for (int v = 0; v < V; v++) {
+        if (!visited[v] && dist[v] < min) {
+            min = dist[v];
+            min_index = v;
+        }
+    }
+    return min_index;
+}
+
+void Dijkstra(int graph[MAX_NODES][MAX_NODES], int V, int source) {
+    int dist[V];
+    bool visited[V];
+
+    for (int i = 0; i < V; i++) {
+        dist[i] = INF;
+        visited[i] = false;
+    }
+
+    dist[source] = 0;
+
+    for (int count = 0; count < V - 1; count++) {
+        int u = minDistance(dist, visited, V);
+        if (u == -1) break;
+
+        visited[u] = true;
+
+        for (int v = 0; v < V; v++) {
+            if (graph[u][v] && !visited[v] && dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+            }
+        }
+    }
+
+    cout << "\nShortest distances from node " << source << ":\n";
+    for (int i = 0; i < V; i++) {
+        cout << source << " To " << i << " -> " << dist[i] << endl;
+    }
+}
+
+int main() {
+    int V, E;
+    cout << "Enter number of locations: ";
+    cin >> V;
+    cout << "Enter number of routes: ";
+    cin >> E;
+
+    int graph[MAX_NODES][MAX_NODES] = {0};
+
+    for (int i = 0; i < E; i++) {
+        int u, v, cost;
+        cout << "Enter route (from - to - cost): ";
+        cin >> u >> v >> cost;
+        graph[u][v] = cost;
+        graph[v][u] = cost; // if undirected
+    }
+
+    int source;
+    cout << "Enter starting node: ";
+    cin >> source;
+
+    Dijkstra(graph, V, source);
+    return 0;
+}
