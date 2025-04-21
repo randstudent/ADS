@@ -1,0 +1,126 @@
+#include <iostream>
+using namespace std;
+
+const int ROWS = 5, COLS = 5;
+
+bool visited [ROWS][COLS] = {false};
+
+int Maze[5][5] = {
+    {0, 0, 1, 1, 1},
+    {1, 0, 1, 1, 0},
+    {1, 0, 0, 0, 0},
+    {1, 1, 1, 1, 0},
+    {1, 1, 1, 0, 0}
+};
+
+bool findPathDFS (int x, int y) {
+    if (x < 0 || y < 0 || x >= ROWS || y >= COLS || visited [x][y] || Maze [x][y] == 1) {
+        return false;
+    }
+
+    cout << "(" << x << ", " << y << ")\n";
+
+    if (x == ROWS - 1 && y == COLS - 1) {
+        cout << "Reached at goal using DFS\n";
+        return true;
+    }
+
+    visited [x][y] = true;
+
+    if (findPathDFS (x + 1, y) || findPathDFS (x, y + 1) || findPathDFS (x - 1, y) || findPathDFS (x, y - 1)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool findPathBFS (int x, int y) {
+    int queueX [ROWS * COLS], queueY [ROWS * COLS];
+    int front = 0;
+    int rear = 0;
+    bool visitedBFS [ROWS][COLS] = {false};
+
+    queueX [rear] = x;
+    queueY [rear] = y;
+    rear++;
+    visitedBFS [x][y] = true;
+
+    int dx [] = {1, -1, 0, 0};
+    int dy [] = {0, 0, 1, -1};
+
+    while (front < rear) {
+        int cx = queueX [front], cy = queueY [front];
+        front++;
+        cout << "(" << cx << ", " << cy << ")\n";
+
+        if (cx == ROWS - 1 && cy == COLS - 1) {
+            cout << "Reached at goal using BFS\n";
+            return true;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            int nx = cx + dx [i], ny = cy + dy [i];
+            //cout << "maze[" << nx << "][" << ny << "] = " << Maze[nx][ny] << endl;
+
+            if (nx >= 0 && ny >= 0 && nx < ROWS && ny < COLS && !visitedBFS [nx][ny] && Maze [nx][ny] == 0) {
+                queueX [rear] = nx;
+                queueY [rear] = ny;
+                rear++;
+                visitedBFS [nx][ny] = true;
+            }
+        }
+    }
+    cout << "No Path Found using BFS!\n";
+    return false;
+}
+
+int main() {
+    cout << "DFS : \n";
+    if (findPathDFS (0,0)) {
+        cout << "Path Exists using DFS\n";
+    }
+    else {
+        cout << "Path does not exists using DFS\n";
+    }
+
+    cout << "BFS : \n";
+    if (findPathBFS (0,0)) {
+        cout << "Path Exists using BFS\n";
+    }
+    else {
+        cout << "Path does not exists using BFS\n";
+    }
+    return 0;
+}
+
+
+/*DFS :
+(0, 0)
+(0, 1)
+(1, 1)
+(2, 1)
+(2, 2)
+(2, 3)
+(2, 4)
+(3, 4)
+(4, 4)
+Reached at goal using DFS
+Path Exists using DFS
+BFS :
+(0, 0)
+(0, 1)
+(1, 1)
+(2, 1)
+(2, 2)
+(2, 3)
+(2, 4)
+(3, 4)
+(1, 4)
+(4, 4)
+Reached at goal using BFS
+Path Exists using BFS
+
+
+=== Code Execution Successful ===
+
+*/
